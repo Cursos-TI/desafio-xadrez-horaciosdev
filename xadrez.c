@@ -5,7 +5,7 @@
 #define BISPO_MOVES 5
 #define TORRE_MOVES 5
 #define RAINHA_MOVES 8
-#define CAVALO_MOVES 1
+#define CAVALO_MOVES 3 // 1 movimento no eixo x e 2 movimentos no eixo y
 
 struct posicao
 {
@@ -18,33 +18,27 @@ void wait(float seconds);
 int clean_scanf(const char *format, void *arg);
 int scanfValidIntValue(const char *prompt);
 void exibirOpcoes();
-void incializarTabuleiro(char tabuleiro[BOARD_SIZE][BOARD_SIZE]);
 void exibirTabuleiro(char tabuleiro[BOARD_SIZE][BOARD_SIZE]);
+void incializarTabuleiro(char tabuleiro[BOARD_SIZE][BOARD_SIZE]);
 void posicionarPeca(char tabuleiro[BOARD_SIZE][BOARD_SIZE], struct posicao *posicao, char peca);
 void moverBispo(char tabuleiro[BOARD_SIZE][BOARD_SIZE], struct posicao *posicao);
 void moverTorre(char tabuleiro[BOARD_SIZE][BOARD_SIZE], struct posicao *posicao);
 void moverRainha(char tabuleiro[BOARD_SIZE][BOARD_SIZE], struct posicao *posicao);
-void moverCavalo(char tabuleiro[BOARD_SIZE][BOARD_SIZE], struct posicao *posicao);
-
-// Desafio de Xadrez - MateCheck
-// Este código inicial serve como base para o desenvolvimento do sistema de movimentação das peças de xadrez.
-// O objetivo é utilizar estruturas de repetição e funções para determinar os limites de movimentação dentro do jogo.
+void moverCavalo(char tabuleiro[BOARD_SIZE][BOARD_SIZE], struct posicao *posicao, int moveCount);
+void movePeca(char tabuleiro[BOARD_SIZE][BOARD_SIZE], struct posicao *posicaoPeca, int moveCount);
 
 int main()
 {
-    char tabuleiro[BOARD_SIZE][BOARD_SIZE];
     int opcao = -1;
-
-    incializarTabuleiro(tabuleiro);
-
+    char tabuleiro[BOARD_SIZE][BOARD_SIZE];
     do
     {
+        incializarTabuleiro(tabuleiro);
         int moves = 0;
         struct posicao posicaoPeca = (struct posicao){0, 0};
         cls();
         exibirTabuleiro(tabuleiro);
 
-        printf("\n\n");
         exibirOpcoes();
 
         opcao = scanfValidIntValue("Opção: \n=> ");
@@ -58,14 +52,7 @@ int main()
             cls();
             posicionarPeca(tabuleiro, &posicaoPeca, 'B');
             exibirTabuleiro(tabuleiro);
-            while (BISPO_MOVES > moves)
-            {
-                wait(0.5);
-                cls();
-                moverBispo(tabuleiro, &posicaoPeca);
-                exibirTabuleiro(tabuleiro);
-                moves++;
-            }
+            movePeca(tabuleiro, &posicaoPeca, BISPO_MOVES);
             break;
         case 2:
             // Implementação de Movimentação da Torre
@@ -74,14 +61,7 @@ int main()
             cls();
             posicionarPeca(tabuleiro, &posicaoPeca, 'T');
             exibirTabuleiro(tabuleiro);
-            while (TORRE_MOVES > moves)
-            {
-                wait(0.5);
-                cls();
-                moverTorre(tabuleiro, &posicaoPeca);
-                exibirTabuleiro(tabuleiro);
-                moves++;
-            }
+            movePeca(tabuleiro, &posicaoPeca, TORRE_MOVES);
             break;
         case 3:
             // Implementação de Movimentação da Rainha
@@ -90,14 +70,7 @@ int main()
             cls();
             posicionarPeca(tabuleiro, &posicaoPeca, 'R');
             exibirTabuleiro(tabuleiro);
-            while (RAINHA_MOVES > moves)
-            {
-                wait(0.5);
-                cls();
-                moverRainha(tabuleiro, &posicaoPeca);
-                exibirTabuleiro(tabuleiro);
-                moves++;
-            }
+            movePeca(tabuleiro, &posicaoPeca, RAINHA_MOVES);
             break;
         case 4:
             // Implementação de Movimentação do Cavalo
@@ -106,63 +79,54 @@ int main()
             cls();
             posicionarPeca(tabuleiro, &posicaoPeca, 'C');
             exibirTabuleiro(tabuleiro);
-            while (CAVALO_MOVES > moves)
-            {
-                wait(0.5);
-                cls();
-                moverCavalo(tabuleiro, &posicaoPeca);
-                exibirTabuleiro(tabuleiro);
-                moves++;
-            }
+            movePeca(tabuleiro, &posicaoPeca, CAVALO_MOVES);
             break;
+        case 0:
+            cls();
+            printf("Encerrando o programa...\n");
+            return 0;
         default:
             printf("Opção inválida!\n");
             printf("Pressione Enter para continuar...");
             getchar();
-            opcao = -1;
-            break;
-        }
+            continue;
+        }        
+
+        opcao = -1;
+        printf("\nPressione Enter para continuar...");
+        getchar();
+
     } while (opcao == -1);
-
-    // printf("\n Aperte ENTER para encerrar o programa.");
-    // getchar();
-
-    // Nível Novato - Movimentação das Peças
-    // Sugestão: Declare variáveis constantes para representar o número de casas que cada peça pode se mover.
-
-    // Implementação de Movimentação do Bispo
-    // Sugestão: Utilize uma estrutura de repetição para simular a movimentação do Bispo em diagonal.
-
-    // Implementação de Movimentação da Torre
-    // Sugestão: Utilize uma estrutura de repetição para simular a movimentação da Torre para a direita.
-
-    // Implementação de Movimentação da Rainha
-    // Sugestão: Utilize uma estrutura de repetição para simular a movimentação da Rainha para a esquerda.
-
-    // Nível Aventureiro - Movimentação do Cavalo
-    // Sugestão: Utilize loops aninhados para simular a movimentação do Cavalo em L.
-    // Um loop pode representar a movimentação horizontal e outro vertical.
-
-    // Nível Mestre - Funções Recursivas e Loops Aninhados
-    // Sugestão: Substitua as movimentações das peças por funções recursivas.
-    // Exemplo: Crie uma função recursiva para o movimento do Bispo.
-
-    // Sugestão: Implemente a movimentação do Cavalo utilizando loops com variáveis múltiplas e condições avançadas.
-    // Inclua o uso de continue e break dentro dos loops.
 
     return 0;
 }
 
-void cls()
+void movePeca(char tabuleiro[BOARD_SIZE][BOARD_SIZE], struct posicao *posicaoPeca, int moveCount)
 {
-    printf("\033[H\033[J");
-}
-
-void wait(float seconds)
-{
-    clock_t start_time = clock();
-    while ((float)(clock() - start_time) / CLOCKS_PER_SEC < seconds)
-        ;
+    wait(0.5);
+    cls();
+    switch(tabuleiro[posicaoPeca->x][posicaoPeca->y]){
+        case 'B':
+            moverBispo(tabuleiro, posicaoPeca);
+            break;
+        case 'T':
+            moverTorre(tabuleiro, posicaoPeca);
+            break;
+        case 'R':
+            moverRainha(tabuleiro, posicaoPeca);
+            break;
+        case 'C':
+            moverCavalo(tabuleiro, posicaoPeca, moveCount);
+            break;
+    }
+    exibirTabuleiro(tabuleiro);    
+    if( moveCount > 1)
+    {
+        printf("Exibindo movimento da peça...");
+        movePeca(tabuleiro, posicaoPeca, moveCount - 1);
+    }else{
+        printf("Movimento concluído!\n");
+    }
 }
 
 void exibirOpcoes()
@@ -172,6 +136,7 @@ void exibirOpcoes()
     printf("2. - Torre  [T] - 5 casas para a direita\n");
     printf("3. - Rainha [R] - 8 casas para a esquerda\n");
     printf("4. - Cavalo [C] - 1 vez em L para cima à direita\n");
+    printf("0. - Sair\n");
 }
 
 void incializarTabuleiro(char tabuleiro[BOARD_SIZE][BOARD_SIZE])
@@ -212,11 +177,14 @@ void moverRainha(char tabuleiro[BOARD_SIZE][BOARD_SIZE], struct posicao *posicao
     tabuleiro[posicao->x][posicao->y] = 'R';
 }
 
-void moverCavalo(char tabuleiro[BOARD_SIZE][BOARD_SIZE], struct posicao *posicao)
+void moverCavalo(char tabuleiro[BOARD_SIZE][BOARD_SIZE], struct posicao *posicao, int moveCount)
 {
     tabuleiro[posicao->x][posicao->y] = '.';
-    posicao->x++;
-    posicao->y+=2;
+    if(moveCount == CAVALO_MOVES){
+        posicao->x++;
+    }else{
+        posicao->y++;
+    }
     tabuleiro[posicao->x][posicao->y] = 'C';
 }
 
@@ -253,4 +221,16 @@ void exibirTabuleiro(char tabuleiro[BOARD_SIZE][BOARD_SIZE])
         }
     }
     printf("\n\n");
+}
+
+void cls()
+{
+    printf("\033[H\033[J");
+}
+
+void wait(float seconds)
+{
+    clock_t start_time = clock();
+    while ((float)(clock() - start_time) / CLOCKS_PER_SEC < seconds)
+        ;
 }
